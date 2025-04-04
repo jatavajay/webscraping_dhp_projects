@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yearly Tag Usage Trends</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .chart-container {
+            max-width: 1200px;
+            height: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Top 10 Stack Overflow Tags (2023-2025)</h1>
+    <h2> - Created by Ajay Jatav </h2>
+    <div class="chart-container">
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log('Received data:', data);  // Debug log
+                
+                if (!data.years || !data.datasets) {
+                    console.error('Invalid data format:', data);
+                    return;
+                }
+
+                // Create the chart
+                const ctx = document.getElementById('lineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.years,
+                        datasets: data.datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Yearly Tag Usage Trends',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                }
+                            },
+                            subtitle: {
+                                display: true,
+                                text: 'Each line represents the percentage of total questions for that year',
+                                font: {
+                                size: 14,
+                                style: 'italic'
+                            },
+                            },
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Questions',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    maxRotation: 0
+                                }
+                            }
+                        },
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        elements: {
+                            point: {
+                                radius: 5,
+                                hoverRadius: 7
+                            },
+                            line: {
+                                tension: 0.3
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.querySelector('.chart-container').innerHTML = 
+                    '<p style="color: red; text-align: center;">Error loading chart data. Please check the console for details.</p>';
+            }
+        }
+
+        // Fetch data when the page loads
+        fetchData();
+    </script>
+</body>
+</html> 
